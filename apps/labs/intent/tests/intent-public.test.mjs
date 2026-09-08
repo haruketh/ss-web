@@ -50,6 +50,22 @@ test("valid public schema is returned from the fixed KV key", async () => {
   assert.deepEqual(binding.calls, [[KV_KEY, "text"]]);
 });
 
+test("non-ASCII UTF-8 survives the KV-to-response round trip", async () => {
+  const document = validDocument();
+  document.summary = "another agent’s behavior / Saruku’s self-description / 日本語";
+  const binding = bindingFor(JSON.stringify(document));
+  const response = await handleIntentRequest({ INTENT_PUBLIC_KV: binding });
+
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("content-type"), "application/json; charset=utf-8");
+  const body = await response.text();
+  assert.equal(body.includes("another agent’s behavior"), true);
+  assert.equal(body.includes("Saruku’s self-description"), true);
+  assert.equal(body.includes("日本語"), true);
+  assert.equal(body.includes("窶冱"), false);
+  assert.equal(JSON.parse(body).summary, document.summary);
+});
+
 test("missing KV value returns a safe 404", async () => {
   const response = await handleIntentRequest({ INTENT_PUBLIC_KV: bindingFor(null) });
   assert.equal(response.status, 404);

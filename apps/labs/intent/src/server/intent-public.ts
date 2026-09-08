@@ -134,6 +134,7 @@ function jsonResponse(body: JsonObject, status: number, cacheControl = "no-store
     status,
     headers: {
       "cache-control": cacheControl,
+      "content-type": "application/json; charset=utf-8",
       "x-content-type-options": "nosniff",
     },
   });
