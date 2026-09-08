@@ -1,0 +1,5 @@
+{
+  "name": "ss-web",
+  "private": true,
+  "packageManager": "pnpm@10"
+}
