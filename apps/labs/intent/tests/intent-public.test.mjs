@@ -6,7 +6,7 @@ import {
   KV_KEY,
   handleIntentRequest,
   validatePublicIntent,
-} from "../functions/_lib/intent-public.mjs";
+} from "../src/server/intent-public.ts";
 
 function validDocument() {
   return {

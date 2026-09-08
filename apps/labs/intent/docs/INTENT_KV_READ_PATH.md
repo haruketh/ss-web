@@ -9,7 +9,7 @@ Workers KV. This app reads that value server-side and exposes a read-only respon
 ss-engine private state
   -> ss-engine public-safe exporter
   -> Workers KV key: intent/latest.json
-  -> Pages Function GET /api/intent
+  -> vinext Next.js Route Handler GET /api/intent on Cloudflare Workers
   -> future Intent UI
 ```
 
@@ -28,36 +28,56 @@ private Intent data into browser code or static assets.
 
 ## Local development
 
-Create a local KV namespace through Wrangler's local Pages development support and
-bind it as `INTENT_PUBLIC_KV`. Seed only a synthetic document matching public schema
-version 1 at `intent/latest.json`; do not copy production Intent runtime data into
-the repository.
+The checked-in Wrangler configuration declares `INTENT_PUBLIC_KV` with the
+production namespace ID. Wrangler local development still uses a local KV store.
+Seed only a synthetic document matching public schema version 1 at
+`intent/latest.json`; do not copy production Intent runtime data into the repository.
 
-For example, after the app's Cloudflare Pages build/development command is defined:
+For example:
 
 ```text
-wrangler pages dev <build-output> --kv INTENT_PUBLIC_KV
+pnpm exec wrangler kv key put --binding INTENT_PUBLIC_KV --local \
+  --path <synthetic-public-json> intent/latest.json \
+  --config dist/server/wrangler.json
+pnpm run start:vinext
 ```
 
-The binding can also be configured in a local, Git-ignored Wrangler configuration.
-No real namespace identifier or credential is required by the unit tests.
+Run `pnpm run build:vinext` before these commands. Seeding and starting must use the
+same generated `dist/server/wrangler.json`, otherwise Wrangler can select separate
+local stores. No Cloudflare credential is required by the unit tests or local KV
+verification.
 
-## Production Pages configuration
+## Production Workers configuration
 
-In the Cloudflare dashboard for the Intent Pages project:
+With the production KV namespace created:
 
-1. Create or select the Workers KV namespace used by the engine exporter.
-2. Open Settings, then Functions, then KV namespace bindings.
-3. Add the production binding `INTENT_PUBLIC_KV` for that namespace.
-4. Add the same binding separately for Preview only if preview access is intended.
-5. Deploy the application and verify `GET /api/intent`.
+1. Confirm `wrangler.jsonc` contains the intended production namespace ID.
+2. Confirm the server-side binding is named `INTENT_PUBLIC_KV`.
+3. Deploy the Worker and verify `GET /api/intent`.
 
-The engine's write API token remains only on the engine host. The Pages Function
-uses its server-side namespace binding and needs no token in source or client code.
+The engine's write API token remains only on the engine host. The Route Handler uses
+the server-side Workers binding and needs no token in source or client code.
 
-No committed Wrangler file is required for the dashboard-managed binding. If the
-project later adopts a committed Wrangler configuration, use a placeholder/binding
-name only and keep account and namespace identifiers in deployment configuration.
+The production namespace ID is a Cloudflare resource identifier, not a write
+credential, but it is never included in browser code. Account IDs and API tokens do
+not belong in this repository.
+
+## Workers Builds
+
+The generated vinext scripts and `dist/server/wrangler.json` establish these build
+settings for the current monorepo app:
+
+```text
+Root directory: apps/labs/intent
+Build command: pnpm run build:vinext
+Deploy command: pnpm exec wrangler deploy --config dist/server/wrangler.json
+Preview deploy command: pnpm exec wrangler versions upload --config dist/server/wrangler.json
+Production branch: main
+Build watch path: apps/labs/intent/**
+```
+
+Use the custom/vinext Workers configuration, not the Next.js Static HTML Export
+Pages preset.
 
 ## Validation and failures
 
