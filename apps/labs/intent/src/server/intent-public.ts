@@ -129,6 +129,8 @@ export function validatePublicIntent(value: unknown) {
   };
 }
 
+export type PublicIntent = ReturnType<typeof validatePublicIntent>;
+
 function jsonResponse(body: JsonObject, status: number, cacheControl = "no-store") {
   return Response.json(body, {
     status,
