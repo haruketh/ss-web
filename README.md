@@ -26,6 +26,10 @@ Each application under `apps/` is an independent Next.js application.
 
 Labs applications should remain removable without affecting the Main site.
 
+See [`docs/WEB_ARCHITECTURE.md`](docs/WEB_ARCHITECTURE.md) for the public/private
+boundary and future application structure, and
+[`docs/WEB_DEPLOYMENT.md`](docs/WEB_DEPLOYMENT.md) for the current Workers model.
+
 ## Public Repository Boundary
 
 This repository is public.

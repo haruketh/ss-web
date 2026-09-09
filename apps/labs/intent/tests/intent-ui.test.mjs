@@ -8,7 +8,7 @@ import ts from 'typescript';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { validatePublicIntent, AREAS } from '../src/server/intent-public.ts';
-import { AREA_LABELS, STATUS_LABELS, ACTION_LABELS, reviewedLabel } from '../src/lib/intent-display.ts';
+import { AREA_DESCRIPTIONS, AREA_LABELS, STATUS_LABELS, ACTION_LABELS, reviewedLabel } from '../src/lib/intent-display.ts';
 import { THEME_SCRIPT } from '../src/lib/theme.ts';
 
 // Compile the real presentational component in memory; no fixtures or build
@@ -30,6 +30,25 @@ test('all ten headings follow the fixed display order, not API order', () => {
   const ids = [...html.matchAll(/<h2 id="area-([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(ids, [...AREAS]);
   assert.equal(Object.keys(AREA_LABELS).length, 10);
+  assert.equal(Object.keys(AREA_DESCRIPTIONS).length, 10);
+});
+test('each area renders title, fixed description, status, then public thought', () => {
+  const html = render(validatePublicIntent(fixture()));
+  for (const area of AREAS) {
+    const title = AREA_LABELS[area];
+    const description = AREA_DESCRIPTIONS[area];
+    const summary = `Thought about ${area}.`;
+    assert.ok(html.includes(description));
+    assert.ok(html.indexOf(title) < html.indexOf(description));
+    assert.ok(html.indexOf(description) < html.indexOf(summary));
+  }
+  const agencyDescription = AREA_DESCRIPTIONS.agency;
+  const agencySummary = 'Thought about agency.';
+  const agencyStart = html.indexOf(agencyDescription);
+  assert.ok(agencyStart < html.indexOf('Healthy', agencyStart));
+  assert.ok(html.indexOf('Healthy', agencyStart) < html.indexOf(agencySummary));
+  assert.ok(html.includes('Can I make my own choices, act, and speak for myself?'));
+  assert.ok(html.includes('Do I simply need more experience or information before I can judge?'));
 });
 test('status and source action labels are explicit', () => {
   assert.deepEqual(STATUS_LABELS, { healthy: 'Healthy', concern: 'Concern', not_enough_evidence: 'Not enough evidence' });

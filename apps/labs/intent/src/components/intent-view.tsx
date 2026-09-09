@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { PublicIntent } from "../server/intent-public";
-import { AREA_LABELS, STATUS_LABELS, ACTION_LABELS, reviewedLabel } from "../lib/intent-display";
+import { AREA_DESCRIPTIONS, AREA_LABELS, STATUS_LABELS, ACTION_LABELS, reviewedLabel } from "../lib/intent-display";
 
 export function Thought({ children, size = "regular" }: { children: ReactNode; size?: string }) {
   return <div className={`thought thought--${size}`}><p>{children}</p></div>;
@@ -27,7 +27,11 @@ export function IntentView({ document }: { document: PublicIntent | null }) {
       {Object.entries(AREA_LABELS).map(([key, label]) => {
         const area = document.areas.find((entry) => entry.area === key)!;
         return <section className="area" key={key} aria-labelledby={`area-${key}`}>
-          <div className="thought-heading"><h2 id={`area-${key}`}>{label}</h2><span className={`status status--${area.status}`}><i aria-hidden="true" />{STATUS_LABELS[area.status]}</span></div>
+          <header className="area-heading">
+            <h2 id={`area-${key}`}>{label}</h2>
+            <p>{AREA_DESCRIPTIONS[key]}</p>
+            <span className={`status status--${area.status}`}><i aria-hidden="true" />{STATUS_LABELS[area.status]}</span>
+          </header>
           <Thought>{area.summary}</Thought>
         </section>;
       })}
