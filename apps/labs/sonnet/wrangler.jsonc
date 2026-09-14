@@ -6,5 +6,5 @@
   "main": "vinext/server/fetch-handler",
   "assets": {"directory": "dist/client", "not_found_handling": "none", "binding": "ASSETS"},
   "cache": {"enabled": true},
-  "kv_namespaces": [{"binding": "SONNET_PUBLIC_KV", "id": "REPLACE_WITH_SONNET_KV_NAMESPACE_ID"}]
+  "kv_namespaces": [{"binding": "SONNET_PUBLIC_KV", "id": "0bb4f68f432d44c7a456bd85a2f1b5b7"}]
 }
