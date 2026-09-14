@@ -9,4 +9,4 @@ pnpm lint
 pnpm build:vinext
 ```
 
-Before deployment, create a dedicated KV namespace, replace the placeholder namespace ID in `wrangler.jsonc`, bind it as `SONNET_PUBLIC_KV`, and deploy through the existing vinext Cloudflare workflow.
+Before deployment, create a dedicated KV namespace, replace the placeholder namespace ID in `wrangler.jsonc`, bind it as `SONNET_PUBLIC_KV`, and deploy through the existing vinext Cloudflare workflow. The private publisher uses a dedicated Sonnet token restricted to the Second Session account with the account-level `Workers KV Storage Edit` permission; Cloudflare does not scope this permission to an individual namespace.

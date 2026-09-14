@@ -4,4 +4,4 @@ The private runtime deterministically exports schema v1 to a local ignored stagi
 
 Public sources are bounded durable formation opportunities/events, Reflex processing records, protocol request status, active formation state, and current phase/completion/submission metadata. Incoming message bodies, DIDs, signatures, request IDs, secrets, paths, thresholds, and internal scoring never cross the boundary.
 
-Cloudflare namespace creation, binding configuration, secret provisioning on the private engine, deployment, and the five-minute launchd job remain manual production steps.
+Cloudflare namespace creation, binding configuration, protected secret-file provisioning on the private engine, deployment, and the five-minute launchd job remain manual production steps. The dedicated Sonnet token is limited to the Second Session Cloudflare account with account-level `Workers KV Storage Edit`; this permission is not namespace-scoped.
