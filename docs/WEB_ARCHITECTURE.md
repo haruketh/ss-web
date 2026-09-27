@@ -1,82 +1,56 @@
-# Second Session Web Architecture
+# Web Architecture
 
-## Role
-
-Second Session Web is the public presentation and read-only consumption layer for
-Second Session. The private `ss-engine` owns runtime behavior, state generation,
-and public-safe export. This public repository owns Web applications, public
-schemas, UI, and deployment structure.
-
-Only explicitly exported public-safe data crosses this boundary. The Web does not
-read the Mac mini filesystem, private engine state, or private Intent schema.
+## Public State data flow
 
 ```text
-Second Session
-├─ ss-engine (private runtime and public-safe exporters)
-└─ ss-web (public applications and visualization)
+ss-engine private runtime
+  → allowlist public_state exporter
+  → one-shot Cloudflare KV publisher
+  → dedicated STATE_PUBLIC_KV binding
+  → Second Session Worker
+  → /state
 ```
 
-## Monorepo
+The Worker has no connection or credential for ss-engine's private runtime.
+The web app reads only the public projection stored in Cloudflare KV.
+Production currently runs on the `second-session` Worker. Public State
+publication is an independent daily process; Daily Reflection does not call
+Cloudflare.
+
+## State KV binding and key
+
+The main app declares the existing dedicated `STATE_PUBLIC_KV` binding to the
+`second-session-state-public` namespace. It is separate from Intent, Sonnet,
+and other Workers. The Worker also receives the canonical public DID through
+`STATE_PUBLIC_DID` so it can read the matching record.
+
+The key is:
 
 ```text
-ss-web/
-├─ apps/
-│  ├─ main/
-│  └─ labs/
-│     ├─ intent/
-│     └─ room-discovery/
-└─ packages/
-   ├─ ui/
-   ├─ design-tokens/
-   └─ shared/
+agents/<percent-encoded canonical DID>/state/latest.json
 ```
 
-Applications remain independently deployable. Shared visual primitives and safe
-public utilities should move into `packages/ui`, `packages/design-tokens`, or
-`packages/shared` only when two or more real applications need them.
+The DID remains the key identity; it is not replaced with an unrelated
+`agent_id`. Both ss-engine and ss-web percent-encode the full canonical DID as
+one path segment (Python `urllib.parse.quote(..., safe="")` and JavaScript
+`encodeURIComponent`). For example, `:` becomes `%3A` in the stored KV key.
+The ss-engine publisher passes the stored key directly to Wrangler; Wrangler
+handles encoding for Cloudflare's KV API.
 
-## Deployment model
+The key namespace supports additional DIDs without changing the data model.
+The page selects the current Agent using the public `STATE_PUBLIC_DID` Worker
+variable.
 
-Full-stack Next.js applications deploy as independent Cloudflare Workers using
-vinext. GitHub integration and Workers Builds build each application from its own
-monorepo root. Normal production deployment follows a push to the configured
-branch; local credentials are not used for direct Wrangler production deploys.
+## Runtime behavior
 
-The current Intent Worker lives at `apps/labs/intent`. Its server-side code reads a
-single public document from Cloudflare Workers KV. KV is the public-data boundary,
-not a mirror of engine runtime state.
+- `/state` reads the latest projection at request time.
+- Production KV absence, read failure, or invalid schema renders empty public
+  states and never selects the fixed fixture.
+- Local development may load `apps/main/data/state-demo.json` as a fixture.
+- `/` and `/state-demo` continue to redirect to `/state`.
+- Avatar IDs resolve through a static asset allowlist in the web app; v1's
+  `avatar_001` maps to `/avatars/avatar_001.jpg`.
 
-```text
-ss-engine private Intent
-  -> public-safe exporter
-  -> Cloudflare Workers KV
-  -> Intent Worker
-  -> read-only API and UI
-```
-
-No runtime Intent JSON is stored in ss-web. The Mac mini exposes no inbound path,
-and ss-web has neither a private engine path nor a KV write credential.
-
-## Future architecture
-
-`apps/main` will become the primary public Second Session site. Main will own the
-global header and navigation, with the hamburger menu introduced when Main is
-implemented. It may link to Labs, but its runtime must not depend on them.
-
-Intent can remain an independent Lab. State and Room experiences may become
-separate applications or Workers when their requirements are known. Their refresh
-and polling needs must be designed from those products rather than generalized
-from Intent, which intentionally performs no client polling or automatic refresh.
-
-Labs and v1/v2 prototypes may use Preview deployments. Independent deployment and
-the public/private boundary must remain intact through later consolidation.
-
-## Repository boundary
-
-This public repository may contain frontend implementation, public schemas,
-architecture and UI design, Cloudflare deployment structure, and documentation of
-the public/private boundary.
-
-It must not contain private Intent prompts, raw Review data, evidence, internal
-scoring, private memory, API tokens, private DID keys, security-sensitive engine
-internals, or mutable runtime state.
+The public state is generated and published by ss-engine on a separate daily
+schedule from Daily Reflection. Reflection does not call Cloudflare. A
+publisher failure leaves the previous KV value unchanged.
