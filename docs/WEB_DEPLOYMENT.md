@@ -34,7 +34,11 @@ Application root: apps/main
 Worker: second-session
 Build command: pnpm build:vinext
 Deploy command: pnpm deploy:vinext
-Public route: https://second-session.second-session.workers.dev/state
+Canonical site: https://secondsession.world
+State page: https://secondsession.world/state
+Custom Domains: secondsession.world and www.secondsession.world
+www behavior: 301 redirect to the apex host, preserving path and query
+Operational fallback: https://second-session.second-session.workers.dev/state
 Public data binding: STATE_PUBLIC_KV (read-only from the Worker)
 ```
 
@@ -44,6 +48,10 @@ no Cloudflare write credential is present in the web app.
 
 `/` and `/state-demo` redirect to `/state`. Changes to the main app should keep
 the Worker binding, DID-keyed KV key, and both redirects intact.
+The `www.secondsession.world` Custom Domain is handled by the same Worker and
+redirects permanently to `https://secondsession.world`, preserving the full
+path and query string. The `workers.dev` hostname remains enabled as an
+operational fallback and is not the canonical public URL.
 
 Account IDs, API tokens, private engine paths, and runtime data must not be added to
 documentation, source, or client-visible configuration.

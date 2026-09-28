@@ -17,6 +17,12 @@ Production currently runs on the `second-session` Worker. Public State
 publication is an independent daily process; Daily Reflection does not call
 Cloudflare.
 
+The Worker uses Cloudflare Custom Domains for `secondsession.world` and
+`www.secondsession.world`. The canonical host is `secondsession.world`; the
+same Worker permanently redirects `www` requests to the apex while preserving
+their path and query. The `workers.dev` hostname remains enabled as an
+operational fallback.
+
 ## State KV binding and key
 
 The main app declares the existing dedicated `STATE_PUBLIC_KV` binding to the

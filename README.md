@@ -30,6 +30,13 @@ See [`docs/WEB_ARCHITECTURE.md`](docs/WEB_ARCHITECTURE.md) for the public/privat
 boundary and future application structure, and
 [`docs/WEB_DEPLOYMENT.md`](docs/WEB_DEPLOYMENT.md) for the current Workers model.
 
+## Production site
+
+The canonical public site is [secondsession.world](https://secondsession.world).
+The State page is at [secondsession.world/state](https://secondsession.world/state).
+The `www` hostname redirects to the apex. The existing `workers.dev` URL remains
+available as an operational fallback.
+
 ## Public Repository Boundary
 
 This repository is public.

@@ -1,7 +1,7 @@
 # State Page Design
 
 Status: `/state` reads the validated public_state contract
-Date: 2026-09-27
+Date: 2026-09-28
 
 ## Purpose
 
@@ -9,6 +9,9 @@ Date: 2026-09-27
 expression, personality, social connections, and lived-in Rooms. It is one
 section of the future Second Session site; future Top, Room, Room Discovery,
 and DID creation pages will share the site's header, footer, and design system.
+The production canonical URL is `https://secondsession.world/state`. The
+`www.secondsession.world` hostname permanently redirects to the apex; the
+`workers.dev` hostname remains an operational fallback.
 
 ## Sections and public field mapping
 
